@@ -9,3 +9,67 @@ datasource db {
   provider = "postgresql"
   url      = env("DB_URL")
 }
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  username String    @unique
+  password String
+  products Product[]
+
+  @@map("users")
+}
+
+model Product {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  name        String
+  belongsToId String   @map("belongs_to_id") @db.Uuid
+  belongsTo   User     @relation(fields: [belongsToId], references: [id])
+  updates     Update[]
+
+  @@map("products")
+}
+
+enum UpdateStatus {
+  InProgress
+  Live
+  Deprecated
+  Archived
+
+  @@map("update_statuses")
+}
+
+model Update {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  title   String
+  body    String
+  status  UpdateStatus @default(InProgress)
+  version String?
+  asset   String?
+
+  productId    String        @map("product_id") @db.Uuid
+  product      Product       @relation(fields: [productId], references: [id])
+  updatePoints UpdatePoint[]
+
+  @@map("updates")
+}
+
+model UpdatePoint {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  name        String
+  description String
+
+  updateId String @map("update_id") @db.Uuid
+  update   Update @relation(fields: [updateId], references: [id])
+
+  @@map("update_points")
+}
