@@ -1,6 +1,6 @@
-import database from '../database';
 import { Request, Response } from 'express';
 import { createJwt, hashPassword, isPasswordValid } from '../modules/auth';
+import * as authService from '../services/auth.service';
 
 interface AuthResponse {
     id: string;
@@ -10,14 +10,7 @@ interface AuthResponse {
 export async function signUp(req: Request, res: Response) {
     const username = req.body.username;
     const password = await hashPassword(req.body.password);
-
-    const user = await database.user.create({
-        data: {
-            username,
-            password,
-        },
-    });
-
+    const user = await authService.createUser({ username, password });
     const accessToken = createJwt(user);
     res.json({ id: user.id, accessToken } satisfies AuthResponse);
 }
@@ -25,7 +18,7 @@ export async function signUp(req: Request, res: Response) {
 export async function signIn(req: Request, res: Response) {
     const { username, password } = req.body;
 
-    const user = await database.user.findUnique({ where: { username: username } });
+    const user = await authService.findByUsername(username);
     if (!user) {
         throw new Error('Invalid username or password');
     }
