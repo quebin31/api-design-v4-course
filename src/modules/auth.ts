@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 
@@ -10,9 +10,13 @@ export async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 5);
 }
 
-export function createJwt(payload: { id: string, username: string }): string {
+export function createJwt(payload: { id: string }): string {
     const secret = process.env.JWT_SECRET!!;
-    return jwt.sign(payload, secret);
+    return jwt.sign({}, secret, { subject: payload.id });
+}
+
+function isJwtPayload(payload: string | JwtPayload): payload is JwtPayload {
+    return typeof (payload as JwtPayload) === 'object';
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -24,7 +28,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     }
 
     try {
-        req.jwtPayload = jwt.verify(accessToken, secret);
+        const payload = jwt.verify(accessToken, secret);
+        if (!isJwtPayload(payload)) {
+            return res.status(401).send('Not authorized');
+        }
+
+        req.jwtPayload = payload;
         next();
     } catch (e) {
         res.status(401).send('Not authorized');
