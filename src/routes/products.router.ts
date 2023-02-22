@@ -1,4 +1,4 @@
-import { validateWithSchema } from '../schemas/handlers';
+import { validateWithSchema } from '../schemas/middleware';
 import { optionalProductSchema, requiredProductSchema } from '../schemas/products';
 import { Router } from 'express';
 
