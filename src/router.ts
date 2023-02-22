@@ -1,52 +1,15 @@
 import { Router } from 'express';
+import authRouter from './routes/auth.router';
+import { authMiddleware } from './modules/auth';
+import productsRouter from './routes/products.router';
+import updatesRouter from './routes/updates.router';
+import updatePointsRouter from './routes/update-points.router';
 
-export const router = Router();
+const router = Router();
 
-router.get('/products', (req, res) => {
-    res.json({ message: 'hello' });
-});
+router.use('/', authRouter);
+router.use('/', authMiddleware, productsRouter);
+router.use('/', authMiddleware, updatesRouter);
+router.use('/', authMiddleware, updatePointsRouter);
 
-router.get('/products/:id', () => {
-});
-
-router.put('/products/:id', () => {
-});
-
-router.post('/products/', () => {
-});
-
-router.delete('/products/:id', () => {
-
-});
-
-router.get('/updates', () => {
-});
-
-router.get('/updates/:id', () => {
-});
-
-router.put('/updates/:id', () => {
-});
-
-router.post('/updates/', () => {
-});
-
-router.delete('/updates/:id', () => {
-
-});
-
-router.get('/update-points', () => {
-});
-
-router.get('/update-points/:id', () => {
-});
-
-router.put('/update-points/:id', () => {
-});
-
-router.post('/update-points/', () => {
-});
-
-router.delete('/update-points/:id', () => {
-
-});
+export default router;
