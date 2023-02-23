@@ -30,7 +30,6 @@ model Product {
   belongsTo   User     @relation(fields: [belongsToId], references: [id])
   updates     Update[]
 
-  @@unique([id, belongsToId])
   @@map("products")
 }
 
