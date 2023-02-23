@@ -10,5 +10,6 @@ server.use(express.urlencoded({ extended: true }));
 server.use('/api', router);
 
 server.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+    console.log(err);
     res.sendStatus(500);
 });

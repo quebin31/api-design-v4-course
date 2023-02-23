@@ -10,11 +10,9 @@ const updateSchemaMap = {
 };
 
 export const optionalUpdateSchema = Joi.object(updateSchemaMap);
-export const requiredUpdateSchema = Joi
-    .object(updateSchemaMap)
-    .options({ presence: 'required' })
-    .keys({
-        asset: updateSchemaMap.asset,
-        version: updateSchemaMap.version,
-    });
-
+export const requiredUpdateSchema = Joi.object({
+    ...updateSchemaMap,
+    title: updateSchemaMap.title.required(),
+    body: updateSchemaMap.body.required(),
+    productId: Joi.string().uuid().required(),
+});
