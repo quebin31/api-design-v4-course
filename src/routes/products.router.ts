@@ -1,25 +1,18 @@
 import { validateWithSchema } from '../schemas/middleware';
 import { optionalProductSchema, requiredProductSchema } from '../schemas/products';
 import { Router } from 'express';
+import * as productsController from '../controllers/products.controller';
+import asyncHandler from 'express-async-handler';
 
 const router = Router();
 
-router.get('/products', (req, res) => {
-    res.json({ message: 'hello' });
-});
+const validatePost = validateWithSchema(requiredProductSchema);
+const validatePut = validateWithSchema(optionalProductSchema);
 
-router.get('/products/:id', () => {
-});
-
-router.put('/products/:id', validateWithSchema(optionalProductSchema), () => {
-});
-
-router.post('/products/', validateWithSchema(requiredProductSchema), (req, res) => {
-});
-
-router.delete('/products/:id', () => {
-
-});
-
+router.get('/products', asyncHandler(productsController.getProducts));
+router.get('/products/:id', asyncHandler(productsController.getProduct));
+router.post('/products/', validatePost, asyncHandler(productsController.createProduct));
+router.put('/products/:id', validatePut, asyncHandler(productsController.updateProduct));
+router.delete('/products/:id', asyncHandler(productsController.deleteProduct));
 
 export default router;
