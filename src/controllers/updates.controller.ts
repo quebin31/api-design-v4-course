@@ -5,7 +5,7 @@ import { Update } from '@prisma/client';
 import { NotFoundError } from '../errors';
 
 export interface UpdatesByProduct {
-    [productId: string]: Update[];
+    [productId: string]: Update[],
 }
 
 function mapToUpdatesByProduct(products: ProductWithUpdates[]): UpdatesByProduct {
