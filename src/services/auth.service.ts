@@ -1,7 +1,9 @@
 import database from '../database';
+import { hashPassword } from '../modules/auth';
 
 export async function createUser({ username, password }: { username: string, password: string }) {
-    return database.user.create({ data: { username, password } });
+    const hashedPassword = await hashPassword(password);
+    return database.user.create({ data: { username, password: hashedPassword } });
 }
 
 export async function findByUsername(username: string) {

@@ -1,18 +1,11 @@
 import { Request, Response } from 'express';
-import { createJwt, hashPassword, isPasswordValid } from '../modules/auth';
+import { createJwt, isPasswordValid } from '../modules/auth';
 import * as authService from '../services/auth.service';
 
-interface AuthResponse {
-    id: string;
-    accessToken: string;
-}
-
 export async function signUp(req: Request, res: Response) {
-    const username = req.body.username;
-    const password = await hashPassword(req.body.password);
-    const user = await authService.createUser({ username, password });
+    const user = await authService.createUser(req.body);
     const accessToken = createJwt(user);
-    res.json({ id: user.id, accessToken } satisfies AuthResponse);
+    res.json({ id: user.id, accessToken });
 }
 
 export async function signIn(req: Request, res: Response) {
@@ -29,5 +22,5 @@ export async function signIn(req: Request, res: Response) {
     }
 
     const accessToken = createJwt(user);
-    res.json({ id: user.id, accessToken } satisfies AuthResponse);
+    res.json({ id: user.id, accessToken });
 }
