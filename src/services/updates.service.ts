@@ -1,6 +1,7 @@
 import database from '../database';
 import prisma from '../database';
 import { Product, Update } from '@prisma/client';
+import { ConflictError } from '../errors';
 
 export type ProductWithUpdates = Product & { updates: Update[] }
 
@@ -40,7 +41,7 @@ export async function createUpdate(userId: string, update: NewUpdate): Promise<U
         });
 
         if (!product) {
-            throw new Error('No product to insert into was found matching the criteria');
+            throw new ConflictError('Can\'t create update, no product was found');
         }
 
         return tx.update.create({
@@ -68,7 +69,7 @@ export async function updateUpdate(id: string, userId: string, update: Partial<U
         });
 
         if (result.count !== 1) {
-            throw new Error('Zero or more than one update records were modified');
+            throw new ConflictError('Couldn\'t update the given update record');
         }
 
         return tx.update.findUnique({ where: { id } });

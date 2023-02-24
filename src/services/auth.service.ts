@@ -1,6 +1,6 @@
 import database from '../database';
 import { createJwt, hashPassword, isPasswordValid } from '../modules/auth';
-import { UnauthorizedError } from '../errors';
+import { BadRequestError, ConflictError } from '../errors';
 
 async function createUser(data: { username: string, password: string }) {
     return database.user.create({ data });
@@ -16,20 +16,24 @@ type AuthPayload = {
 }
 
 export async function register({ username, password }: AuthPayload) {
-    const hashedPassword = await hashPassword(password);
-    const user = await createUser({ username, password: hashedPassword });
-    return { id: user.id, accessToken: createJwt({ id: user.id }) };
+    try {
+        const hashedPassword = await hashPassword(password);
+        const user = await createUser({ username, password: hashedPassword });
+        return { id: user.id, accessToken: createJwt({ id: user.id }) };
+    } catch (e) {
+        throw new ConflictError('Username already exists');
+    }
 }
 
 export async function validate({ username, password }: AuthPayload) {
     const user = await findByUsername(username);
     if (!user) {
-        throw new UnauthorizedError('Invalid username or password');
+        throw new BadRequestError('Invalid username or password');
     }
 
     const isValid = await isPasswordValid(password, user.password);
     if (!isValid) {
-        throw new UnauthorizedError('Invalid username or password');
+        throw new BadRequestError('Invalid username or password');
     }
 
     return { id: user.id, accessToken: createJwt({ id: user.id }) };
