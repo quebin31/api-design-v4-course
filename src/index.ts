@@ -1,9 +1,6 @@
 import { server } from './server';
-import dotenv from 'dotenv';
+import config from './config';
 
-dotenv.config();
-const port = parseInt(process.env.PORT ?? '5001');
-
-server.listen(port, () => {
-    console.log(`Serving on http://localhost:${port}`);
+server.listen(config.port, () => {
+    console.log(`Serving on http://localhost:${config.port}`);
 });

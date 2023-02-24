@@ -2,6 +2,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { UnauthorizedError } from '../errors';
+import config from '../config';
 
 export async function isPasswordValid(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
@@ -12,8 +13,7 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export function createJwt(payload: { id: string }): string {
-    const secret = process.env.JWT_SECRET!!;
-    return jwt.sign({}, secret, { subject: payload.id });
+    return jwt.sign({}, config.jwtSecret, { subject: payload.id });
 }
 
 function isJwtPayload(payload: string | JwtPayload): payload is JwtPayload {
@@ -21,7 +21,6 @@ function isJwtPayload(payload: string | JwtPayload): payload is JwtPayload {
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    const secret = process.env.JWT_SECRET!!;
     const [_, accessToken] = req.headers.authorization?.split(' ') ?? [];
 
     if (!accessToken) {
@@ -30,7 +29,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
     let payload;
     try {
-        payload = jwt.verify(accessToken, secret);
+        payload = jwt.verify(accessToken, config.jwtSecret);
     } catch (e) {
         throw new UnauthorizedError('Couldn\'t verify JWT');
     }

@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import config from './config';
 
 abstract class RejectError extends Error {
     abstract reject(res: Response): void;
@@ -47,7 +48,7 @@ export function errorHandler(err: Error, req: Request, res: Response, _next: Nex
     if (isRejectError(err)) {
         err.reject(res);
     } else {
-        const message = process.env.NODE_ENV === 'production' ? undefined : err.message;
+        const message = config.nodeEnv === 'production' ? undefined : err.message;
         const json = { error: 'Internal server error', message };
         res.status(500).json(json);
     }
