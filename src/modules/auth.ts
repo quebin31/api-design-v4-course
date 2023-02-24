@@ -1,6 +1,7 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { UnauthorizedError } from '../errors';
 
 export async function isPasswordValid(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
@@ -24,18 +25,20 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     const [_, accessToken] = req.headers.authorization?.split(' ') ?? [];
 
     if (!accessToken) {
-        return res.status(401).send('Not authorized');
+        throw new UnauthorizedError('Invalid bearer token');
     }
 
+    let payload;
     try {
-        const payload = jwt.verify(accessToken, secret);
-        if (!isJwtPayload(payload)) {
-            return res.status(401).send('Not authorized');
-        }
-
-        req.jwtPayload = payload;
-        next();
+        payload = jwt.verify(accessToken, secret);
     } catch (e) {
-        res.status(401).send('Not authorized');
+        throw new UnauthorizedError('Couldn\'t verify JWT');
     }
+
+    if (!isJwtPayload(payload)) {
+        throw new UnauthorizedError('Invalid JWT payload');
+    }
+
+    req.userId = payload?.sub;
+    next();
 }
